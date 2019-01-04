@@ -37,25 +37,39 @@ line2, = axes2.plot(xs, ys2)
 line3, = axes3.plot(xs, ys3)
 
 
-def animate(ys1, ys2, ys3):
+def animate(ysx, ysy, ysz):
     try:
-        Xvalue = float(ser.readline().rstrip())
-        Yvalue = float(ser.readline().rstrip())
-        Zvalue = float(ser.readline().rstrip())
-        endValue = ser.readline()
-        ys1.append(Xvalue)
-        ys2.append(Yvalue)
-        ys3.append(Zvalue)
+        line_from_accelerator = ser.readline().rstrip()
+        if line_from_accelerator[0] != '$':
+            print("Bad string " + line_from_accelerator)
+            print("Incoming string should start with \'$\'")
+        else:
+            list_of_values = line_from_accelerator[1:].split("|")
+            x_value = float(list_of_values[0])
+            y_value = float(list_of_values[1])
+            z_value = float(list_of_values[2])
+            ysx.append(x_value)
+            ysy.append(y_value)
+            ysz.append(z_value)
 
     except ValueError:
         print("Incorrect value!")
 
-    ys1 = ys1[-x_len:]
-    ys2 = ys2[-x_len:]
-    ys3 = ys3[-x_len:]
+    ysx = ysx[-x_len:]
+    ysy = ysy[-x_len:]
+    ysz = ysz[-x_len:]
 
-    line1.set_ydata(ys1)
-    line2.set_ydata(ys2)
-    line3.set_ydata(ys3)
+    line1.set_ydata(ysx)
+    line2.set_ydata(ysy)
+    line3.set_ydata(ysz)
 
     return line1, line2, line3
+
+
+ani = animation.FuncAnimation(figure, animate, fargs=(ys1, ys2, ys3), interval=10, blit=True)
+
+manager = plt.get_current_fig_manager()
+manager.full_screen_toggle()
+plt.show()
+
+ser.close()
